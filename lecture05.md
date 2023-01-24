@@ -35,7 +35,7 @@ bundle exec rails assets:precompile RAILS_ENV=development
 rails s -p 3000 -b 0.0.0.0
 ~~~
 
-![組み込み起動](Desktop/組み込み起動.png)
+<img width="1680" alt="組み込み起動" src="https://user-images.githubusercontent.com/111736198/214257454-6f8f3b4d-4047-4287-a1bd-c013bb170601.png">
 
 ## サーバーアプリを分けての起動
 
@@ -87,7 +87,7 @@ server {
 bundle exec unicorn_rails -c config/unicorn.rb -D
 ~~~
 
-![unicorn,nginxでの起動](Desktop/unicorn,nginxでの起動.png)
+<img width="1680" alt="unicorn,nginxでの起動" src="https://user-images.githubusercontent.com/111736198/214257826-c4322335-469a-4ca1-94dc-ae9b58108d0a.png">
 
 ## ELBの追加
 1. ターゲットグループとALBの作成
@@ -105,7 +105,7 @@ end
 
 3. DNSへ接続
 
-![ELB追加接続](Desktop/ELB追加接続.png)
+<img width="1680" alt="ELB追加接続" src="https://user-images.githubusercontent.com/111736198/214258014-76417cc1-a5ef-4af9-9d73-96036f06c7ea.png">
 
 ##S3の追加（画像の保存先をS3に変更する）
 1. S3バケットの作成（参考サイト　https://qiita.com/ysda/items/49fa6e8318c874a57b9e）
@@ -134,9 +134,13 @@ amazon:
 EDITOR=vi rails credentials:edit
 ~~~
 
-![S3保存確認](Desktop/S3保存確認.png)
-![エラー解消起動成功](Desktop/エラー解消起動成功.png) 
+<img width="1680" alt="S3保存確認" src="https://user-images.githubusercontent.com/111736198/214258210-c541de52-6248-44db-a437-f53da67268b4.png">
+<img width="1680" alt="エラー解消起動成功" src="https://user-images.githubusercontent.com/111736198/214258288-db5d17dd-8140-40e1-9beb-0453213d7776.png">
 
 ## AWS構成図
-![第5回課題-ページ2](Desktop/第5回課題-ページ2.jpg)
+
+![第5回課題-ページ2](https://user-images.githubusercontent.com/111736198/214258520-6f341e79-6173-4f6c-a6d4-8ad7f98415e0.jpg)
+
+## 課題の感想
+* 今までの比ではないぐらいさまざまなエラーに遭遇した。とにかく各種エラーログがどこにあるのかを見るのが大切だと感じた。
 
