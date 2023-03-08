@@ -132,4 +132,5 @@ Outputs:
     Description: A reference to the created ALB
     Value: !Ref LoadBalancer
     Export:
-      Name: task10-alb                
+      Name: task10-alb
+                

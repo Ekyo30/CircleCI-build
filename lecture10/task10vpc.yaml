@@ -173,4 +173,5 @@ Outputs:
     Description: A reference to the created PrivateSubnet2
     Value: !Ref PrivateSubnet2
     Export:
-      Name: task10-privatesubnet2      
+      Name: task10-privatesubnet2 
+     
