@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "create RDS & SubnetGroup"
+
+Resources:
+    SubnetGroup:
+        Type: "AWS::RDS::DBSubnetGroup"
+        Properties:
+            DBSubnetGroupDescription: "Created from the RDS Management Console"
+            DBSubnetGroupName: "task10-subnetgroup"
+            SubnetIds: 
+              - !ImportValue task10-publicsubnet1
+              - !ImportValue task10-publicsubnet2
+              - !ImportValue task10-privatesubnet1
+              - !ImportValue task10-privatesubnet2
+
+    Instance:
+        Type: "AWS::RDS::DBInstance"
+        Properties:
+            DBInstanceIdentifier: "task10"
+            AllocatedStorage: 20
+            DBInstanceClass: "db.t3.micro"
+            Engine: "mysql"
+            MasterUsername: "admin"
+            MasterUserPassword: "kXgFUJ2x"
+            PreferredBackupWindow: "14:27-14:57"
+            BackupRetentionPeriod: 7
+            AvailabilityZone: !Sub "${AWS::Region}c"
+            PreferredMaintenanceWindow: "fri:16:57-fri:17:27"
+            MultiAZ: false
+            EngineVersion: "8.0.28"
+            AutoMinorVersionUpgrade: true
+            LicenseModel: "general-public-license"
+            PubliclyAccessible: false
+            StorageType: "gp2"
+            Port: 3306
+            StorageEncrypted: true
+            KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/a04424a9-7f9b-4162-b169-e0b2c10494bd"
+            CopyTagsToSnapshot: true
+            MonitoringInterval: 0
+            EnableIAMDatabaseAuthentication: false
+            EnablePerformanceInsights: false
+            DeletionProtection: false
+            VPCSecurityGroups: 
+              - !ImportValue task10-sg
+            DBSubnetGroupName: !Ref SubnetGroup 
+            DBParameterGroupName: "default.mysql8.0"
+            OptionGroupName: "default:mysql-8-0"
+            CACertificateIdentifier: "rds-ca-2019"
+
+Outputs: 
+  DBSubnetGroup:
+    Description: A reference to the created DBSubnetGroup
+    Value: !Ref SubnetGroup
+    Export:
+      Name: task10-subnetgroup
+
+  DBInstance:
+    Description: A reference to the created DBInstance
+    Value: !Ref Instance
+    Export:
+      Name: task10-rds
+  

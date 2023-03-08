@@ -1,0 +1,177 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "create VPC & subnets"
+
+Resources:
+    VPC:
+        Type: "AWS::EC2::VPC"
+        Properties:
+            CidrBlock: "10.0.0.0/16"
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            InstanceTenancy: "default"
+            Tags: 
+              - 
+                Key: "Name"
+                Value: "task10-vpc"
+
+    InternetGateway:
+        Type: "AWS::EC2::InternetGateway"
+        Properties:
+            Tags: 
+              - 
+                Key: "Name"
+                Value: "task10-igw"
+  
+    InternetGatewayAttachment:
+        Type: "AWS::EC2::VPCGatewayAttachment"
+        Properties:
+            InternetGatewayId: !Ref InternetGateway
+            VpcId: !Ref VPC                              
+
+    PublicSubnet1:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+            AvailabilityZone: !GetAtt PrivateSubnet2.AvailabilityZone
+            CidrBlock: "10.0.0.0/20"
+            VpcId: !Ref VPC
+            MapPublicIpOnLaunch: false
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-subnet-public1-${PrivateSubnet1.AvailabilityZone}"
+
+    PublicSubnet2:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+            AvailabilityZone: !GetAtt PrivateSubnet1.AvailabilityZone
+            CidrBlock: "10.0.16.0/20"
+            VpcId: !Ref VPC
+            MapPublicIpOnLaunch: false
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-subnet-public2-${PrivateSubnet2.AvailabilityZone}"
+
+    PrivateSubnet1:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+            AvailabilityZone: !Sub "${AWS::Region}c"
+            CidrBlock: "10.0.144.0/20"
+            VpcId: !Ref VPC
+            MapPublicIpOnLaunch: false
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-subnet-private2-${AWS::Region}c"
+
+    PrivateSubnet2:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+            AvailabilityZone: !Sub "${AWS::Region}a"
+            CidrBlock: "10.0.128.0/20"
+            VpcId: !Ref VPC
+            MapPublicIpOnLaunch: false
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-subnet-private1-${AWS::Region}a"
+
+    PublicRouteTable1:
+        Type: "AWS::EC2::RouteTable"
+        Properties:
+            VpcId: !Ref VPC
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-rtb-public1-${PublicSubnet1.AvailabilityZone}"
+
+    PublicRouteTable2:
+        Type: "AWS::EC2::RouteTable"
+        Properties:
+            VpcId: !Ref VPC
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-rtb-public2-${PublicSubnet2.AvailabilityZone}"
+
+    Route:
+        Type: "AWS::EC2::Route"
+        Properties:
+            DestinationCidrBlock: "0.0.0.0/0"
+            GatewayId: !Ref InternetGateway
+            RouteTableId: !Ref PublicRouteTable1
+
+    PublicSubnetRouteTableAssociation1:
+        Type: "AWS::EC2::SubnetRouteTableAssociation"
+        Properties:
+            RouteTableId: !Ref PublicRouteTable1
+            SubnetId: !Ref PublicSubnet1
+
+    PublicSubnetRouteTableAssociation2:
+        Type: "AWS::EC2::SubnetRouteTableAssociation"
+        Properties:
+            RouteTableId: !Ref PublicRouteTable2
+            SubnetId: !Ref PublicSubnet2
+
+    PrivateRouteTable1:
+        Type: "AWS::EC2::RouteTable"
+        Properties:
+            VpcId: !Ref VPC
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-rtb-private1-${PublicSubnet1.AvailabilityZone}"
+
+    PrivateRouteTable2:
+        Type: "AWS::EC2::RouteTable"
+        Properties:
+            VpcId: !Ref VPC
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Sub "task10-rtb-private2-${PublicSubnet2.AvailabilityZone}"
+
+    PrivateSubnet1RouteTableAssociation1:
+        Type: "AWS::EC2::SubnetRouteTableAssociation"
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable1
+            SubnetId: !Ref PrivateSubnet1
+
+    PrivateSubnet2RouteTableAssociation2:
+        Type: "AWS::EC2::SubnetRouteTableAssociation"
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable2
+            SubnetId: !Ref PrivateSubnet2
+
+Outputs:
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+    Export:
+      Name: task10-vpc
+
+  PublicSubnet1:        
+    Description: A reference to the created PublicSubnet1
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: task10-publicsubnet1
+
+  PublicSubnet2:        
+    Description: A reference to the created PublicSubnet2
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: task10-publicsubnet2
+
+  PrivateSubnet1:
+    Description: A reference to the created PrivateSubnet1
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: task10-privatesubnet1
+
+  PrivateSubnet2:        
+    Description: A reference to the created PrivateSubnet2
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: task10-privatesubnet2 
+     

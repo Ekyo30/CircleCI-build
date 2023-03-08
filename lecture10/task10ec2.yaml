@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "create EC2 & SecurityGroups"
+
+Resources:
+    SecurityGroup:
+        Type: "AWS::EC2::SecurityGroup"
+        Properties:
+            GroupDescription: "task10"
+            GroupName: "task10"
+            VpcId: !ImportValue task10-vpc
+            SecurityGroupIngress: 
+              - 
+                CidrIp: "0.0.0.0/0"
+                FromPort: 80
+                IpProtocol: "tcp"
+                ToPort: 80
+              - 
+                CidrIp: "0.0.0.0/0"
+                FromPort: 22
+                IpProtocol: "tcp"
+                ToPort: 22
+              - 
+                CidrIp: "0.0.0.0/0"
+                FromPort: 3000
+                IpProtocol: "tcp"
+                ToPort: 3000
+              - 
+                CidrIp: "0.0.0.0/0"
+                FromPort: 3306
+                IpProtocol: "tcp"
+                ToPort: 3306
+              - 
+                CidrIp: "0.0.0.0/0"
+                FromPort: -1
+                IpProtocol: "icmp"
+                ToPort: -1
+
+    Instance:
+        Type: "AWS::EC2::Instance"
+        Properties:
+            ImageId: "ami-072bfb8ae2c884cc4"
+            InstanceType: "t2.micro"
+            KeyName: "raisetech"
+            AvailabilityZone: !Sub "${AWS::Region}a"
+            Tenancy: "default"
+            NetworkInterfaces:
+              - AssociatePublicIpAddress: "true"
+                DeviceIndex: "0"            
+                SubnetId: !ImportValue task10-publicsubnet1
+                GroupSet: 
+                - !Ref SecurityGroup
+            Tags: 
+              - 
+                Key: "Name"
+                Value: "task10"
+
+Outputs:
+  SecurityGroup:
+    Description: A reference to the created SecurityGroup
+    Value: !Ref SecurityGroup
+    Export:
+      Name: task10-sg   
+
+  Instance:
+    Description: A reference to the created EC2Instance
+    Value: !Ref Instance
+    Export:
+      Name: task10-ec2
+
