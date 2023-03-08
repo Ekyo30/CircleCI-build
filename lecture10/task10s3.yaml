@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "creat a S3"
+
+Resources:
+    Bucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "task10-bucket"
+            BucketEncryption: 
+                ServerSideEncryptionConfiguration: 
+                  - 
+                    ServerSideEncryptionByDefault: 
+                        SSEAlgorithm: "AES256"
+                    BucketKeyEnabled: true
+
+    BucketPolicy:
+        Type: "AWS::S3::BucketPolicy"
+        Properties:
+            Bucket: !Ref Bucket
+            PolicyDocument: 
+                Version: "2012-10-17"
+                Id: "Policy1544152951996"
+                Statement: 
+                  - 
+                    Sid: "Stmt1544152948221"
+                    Effect: "Allow"
+                    Principal: 
+                        AWS: !Sub "arn:aws:iam::${AWS::AccountId}:user/Test"
+                    Action: "s3:*"
+                    Resource: !Sub "arn:aws:s3:::${Bucket}"
+
+Outputs: 
+  Bucket:
+    Description: A reference to the created Bucket
+    Value: !Ref Bucket
+    Export:
+      Name: task10-s3
+
