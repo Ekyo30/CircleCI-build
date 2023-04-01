@@ -3,21 +3,14 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "create secret for RDS , RDS & SubnetGroup"
 
 Resources:
-  RDSSecret:
-    Type: "AWS::SecretsManager::Secret"
-    Properties:
-      GenerateSecretString:
-        SecretStringTemplate: '{"username": "admin"}'
-        GenerateStringKey: "password"
-        PasswordLength: 16
-        ExcludeCharacters: '"@/\'
-
-  SecretRDSInstanceAttachment:
-    Type: "AWS::SecretsManager::SecretTargetAttachment"
-    Properties:
-      SecretId: !Ref RDSSecret
-      TargetId: !Ref Instance
-      TargetType: AWS::RDS::DBInstance
+    RDSSecret:
+        Type: "AWS::SecretsManager::Secret"
+        Properties:
+          GenerateSecretString:
+            SecretStringTemplate: '{"username": "admin"}'
+            GenerateStringKey: "password"
+            PasswordLength: 16
+            ExcludeCharacters: '"@/\'
 
     SubnetGroup:
         Type: "AWS::RDS::DBSubnetGroup"
@@ -63,6 +56,13 @@ Resources:
             DBParameterGroupName: "default.mysql8.0"
             OptionGroupName: "default:mysql-8-0"
             CACertificateIdentifier: "rds-ca-2019"
+
+    SecretRDSInstanceAttachment:
+       Type: "AWS::SecretsManager::SecretTargetAttachment"
+       Properties:
+         SecretId: !Ref RDSSecret
+         TargetId: !Ref Instance
+         TargetType: AWS::RDS::DBInstance
 
 Outputs: 
   DBSubnetGroup:
