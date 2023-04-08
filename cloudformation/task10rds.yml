@@ -1,8 +1,17 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: "create RDS & SubnetGroup"
+Description: "create secret for RDS , RDS & SubnetGroup"
 
 Resources:
+    RDSSecret:
+        Type: "AWS::SecretsManager::Secret"
+        Properties:
+          GenerateSecretString:
+            SecretStringTemplate: '{"username": "admin"}'
+            GenerateStringKey: "password"
+            PasswordLength: 16
+            ExcludeCharacters: '"@/\'
+
     SubnetGroup:
         Type: "AWS::RDS::DBSubnetGroup"
         Properties:
@@ -21,8 +30,8 @@ Resources:
             AllocatedStorage: 20
             DBInstanceClass: "db.t3.micro"
             Engine: "mysql"
-            MasterUsername: "admin"
-            MasterUserPassword: "kXgFUJ2x"
+            MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:username}}' ]]
+            MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:password}}' ]]
             PreferredBackupWindow: "14:27-14:57"
             BackupRetentionPeriod: 7
             AvailabilityZone: !Sub "${AWS::Region}c"
@@ -47,6 +56,13 @@ Resources:
             DBParameterGroupName: "default.mysql8.0"
             OptionGroupName: "default:mysql-8-0"
             CACertificateIdentifier: "rds-ca-2019"
+
+    SecretRDSInstanceAttachment:
+       Type: "AWS::SecretsManager::SecretTargetAttachment"
+       Properties:
+         SecretId: !Ref RDSSecret
+         TargetId: !Ref Instance
+         TargetType: AWS::RDS::DBInstance
 
 Outputs: 
   DBSubnetGroup:
