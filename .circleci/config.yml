@@ -1,18 +1,35 @@
 version: 2.1
 orbs:
   python: circleci/python@2.0.3
+  ansible-playbook: orbss/ansible-playbook@0.0.5
+
 jobs:
   cfn-lint:
     executor: python/default
     steps:
-      - checkout
-      - run: pip install cfn-lint
-      - run:
-          name: run cfn-lint
-          command: |
-            cfn-lint -i W3002 -t cloudformation/*.yml
+    - checkout
+    - run: pip install cfn-lint
+    - run:
+        name: run cfn-lint
+        command: |
+          cfn-lint -i W3002 -t cloudformation/*.yml
+
+  build:
+    executor: ansible-playbook/default        
+    steps: 
+    - checkout
+    - add_ssh_keys:
+        kyefingerprints:
+          - "${KYE_FINGERPRINT}"
+    - ansible-playbook/install:
+        version: 2.9.23   
+    - run: ssh -o StrictHostKeyChecking=no ${USER_NAME}@${HOST_NAME} 'exit'    
+    - ansible-playbook/playbook: 
+        playbook: ansible/playbook.yml
+        playbook-options: "-i ansible/inventory"
+
 workflows:
   raisetech:
     jobs:
-      - cfn-lint
-
+    - cfn-lint
+    - build
