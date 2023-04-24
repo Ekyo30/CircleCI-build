@@ -33,18 +33,11 @@ jobs:
     executor: ruby/default
     steps:
       - checkout
-      - add_ssh_keys:
-          keyfingerprints:
-          - "${KEY_FINGERPRINT}"
-      - ruby/install:
-          version: '3.1.2'
       - ruby/install-deps: 
           app-dir: serverspec
-      - run:
-          name: rake spec
-          command: |
-            cd serverspec
-            bundle exec rake spec     
+      - run: |
+          cd serverspec
+          bundle exec rake spec     
 
 workflows:
   raisetech:
