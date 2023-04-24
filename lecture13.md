@@ -11,23 +11,23 @@
 
 * コントロールに接続して、ansibleをインストール。
 
-~~
+~~~
 $ sudo amazon-linux-extras install ansible2
-~~
+~~~
 
 * playbookとinventoryを作成。
 
-~~
+~~~
 $ mkdir ansible 
 $ cd ansible
 $ touch playbook.yml inventory
-~~
+~~~
 
 * 作成したplaybookをドライラン
 
-~~
+~~~
 $ ansible-playbook playbook.yml -i inventory --check
-~~
+~~~
 
 * syntax-checkは行わなくてもいいかと思ったが、ドライランだとスキップされてしまう箇所があるためその箇所の確認には必要だと感じた。
 
