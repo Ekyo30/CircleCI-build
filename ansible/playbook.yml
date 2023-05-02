@@ -14,7 +14,7 @@
 
   vars:
     rbenv_path: "{{ ansible_user_dir }}/.rbenv"
-    ruby_version: 2.6.3
+    ruby_version: 3.1.2
     ruby_dir: "{{ rbenv_path }}/versions/{{ ruby_version }}"
 
   tasks:
@@ -63,23 +63,23 @@
       - zlib-devel
 
   - name: check ruby version
-    command: bash -lc "rbenv versions | grep {{ ruby_version }}"
+    command: /bin/bash -lc "rbenv versions | grep {{ ruby_version }}"
     register: rbenv_check_install
     changed_when: false
     ignore_errors: true
 
   - name: install ruby
-    command: bash -lc "rbenv install {{ ruby_version }}"
+    command: /bin/bash -lc "rbenv install {{ ruby_version }}"
     when: rbenv_check_install is failed
     args:
       creates: "{{ ruby_dir }}"
 
   - name: check rbenv global
-    command: bash -lc "rbenv version | grep {{ ruby_version }}"
+    command: /bin/bash -lc "rbenv version | grep {{ ruby_version }}"
     register: rbenv_default
     changed_when: false
     ignore_errors: true
 
   - name: set rbenv global
-    command: bash -lc "rbenv global {{ ruby_version }}"
+    command: /bin/bash -lc "rbenv global {{ ruby_version }}"
     when: rbenv_default is failed
