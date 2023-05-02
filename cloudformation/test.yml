@@ -198,7 +198,7 @@ Resources:
     Type: "AWS::RDS::DBSubnetGroup"
     Properties:
       DBSubnetGroupDescription: "Created from the RDS Management Console"
-      DBSubnetGroupName: "task10-subnetgroup"
+      DBSubnetGroupName: !Sub "${EnvironmentName}-subnetgroup"
       SubnetIds: 
       - !Ref PublicSubnet1
       - !Ref PublicSubnet2
