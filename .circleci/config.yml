@@ -20,9 +20,9 @@ jobs:
     executor: aws-cli/default
     steps:
     - aws-cli/setup:
-        aws-access-key-id: ${AWS_ACCESS_KEY_ID}
-        aws-region: ${AWS_DEFAULT_REGION}
-        aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+        aws-access-key-id: AWS_ACCESS_KEY_ID
+        aws-region: AWS_DEFAULT_REGION
+        aws-secret-access-key: AWS_SECRET_ACCESS_KEY
     - run: aws cloudformation deploy --template-file cloudformation/test.yml --stack-name raisetech-test-cloudformation    
 
   ansible-execute:
