@@ -2,3 +2,7 @@
 [server]
 18.180.85.228
 
+[server:vars]
+ansible_ssh_port=22
+ansible_ssh_user=ec2-user
+__working_user=ec2-user
