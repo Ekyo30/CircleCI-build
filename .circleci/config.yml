@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   python: circleci/python@2.0.3
+  aws-cli: circleci/aws-cli@3.1.5
   ansible-playbook: orbss/ansible-playbook@0.0.5
   ruby: circleci/ruby@2.0.0
 
@@ -15,13 +16,21 @@ jobs:
         command: |
           cfn-lint -i W3002 -t cloudformation/*.yml
 
-  build:
+  cfn-execute:
+    executor: aws-cli/default
+    steps:
+    - aws-cli/setup:
+        aws-access-key-id: ${AWS_ACCESS_KEY_ID}
+        aws-region: ${AWS_DEFAULT_REGION}
+        aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+    - run: aws cloudformation deploy --template-file cloudformation/test.yml --stack-name raisetech-test-cloudformation    
+
+  ansible-execute:
     executor: ansible-playbook/default        
     steps: 
-    - checkout
     - add_ssh_keys:
         keyfingerprints:
-          - "${KEY_FINGERPRINT}"
+        - "${KEY_FINGERPRINT}"
     - ansible-playbook/install:
         version: 2.9.23   
     - run: ssh -o StrictHostKeyChecking=no ${USER_NAME}@${HOST_NAME} 'exit'    
@@ -29,21 +38,25 @@ jobs:
         playbook: ansible/playbook.yml
         playbook-options: "-i ansible/inventory"
         
-  test:
+  serverspec-execute:
     executor: ruby/default
     steps:
-      - checkout
-      - ruby/install-deps: 
-          app-dir: serverspec
-      - run: |
-          cd serverspec
-          bundle exec rake spec     
+    - ruby/install-deps: 
+        app-dir: serverspec
+    - run: |
+        cd serverspec
+        bundle exec rake spec     
 
 workflows:
   raisetech:
     jobs:
     - cfn-lint
-    - build
-    - test:
+    - cfn-execute:
         requires:
-        - build
+          - cfn-lint
+    - ansible-execute:
+        requires:
+          - cfn-execute
+    - serverspec-execute:
+        requires:
+        - ansible-execute
