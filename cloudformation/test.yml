@@ -1,0 +1,311 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "create sample environment"
+
+Parameters:
+  EnvironmentName:
+    Description: "Name of Environment"  
+    Type: String
+    Default: "test"
+
+Resources:
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: "default"
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-vpc"    
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-igw"
+  
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC        
+  
+  PublicSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone:  !Sub "${AWS::Region}a"
+      CidrBlock: "10.0.0.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-public1-${AWS::Region}a"     
+
+  PublicSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone:  !Sub "${AWS::Region}c"
+      CidrBlock: "10.0.16.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-public2-${AWS::Region}c"   
+
+  PrivateSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !GetAtt PublicSubnet1.AvailabilityZone
+      CidrBlock: "10.0.128.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-private1-${PublicSubnet1.AvailabilityZone}"   
+
+  PrivateSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !GetAtt PublicSubnet2.AvailabilityZone
+      CidrBlock: "10.0.144.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-private2-${PublicSubnet2.AvailabilityZone}"    
+
+  PublicRouteTable1:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-public1-${PublicSubnet1.AvailabilityZone}"
+
+  PublicRouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-public2-${PublicSubnet2.AvailabilityZone}"
+
+  PublicSubnetRouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      SubnetId: !Ref PublicSubnet2
+
+  Route:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable1
+
+  PrivateRouteTable1:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-private1-${PublicSubnet1.AvailabilityZone}"
+
+  PrivateRouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-private2-${PublicSubnet2.AvailabilityZone}"
+
+  PrivateSubnet1RouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateSubnet2RouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2                   
+
+  SecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "allow all connection"
+      GroupName: !Sub "${EnvironmentName}-sg"
+      VpcId: !Ref VPC
+      SecurityGroupIngress: 
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 80
+        IpProtocol: "tcp"
+        ToPort: 80
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 3000
+        IpProtocol: "tcp"
+        ToPort: 3000
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 22
+        IpProtocol: "tcp"
+        ToPort: 22  
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 3306
+        IpProtocol: "tcp"
+        ToPort: 3306        
+
+  EC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-072bfb8ae2c884cc4"
+      InstanceType: "t2.micro"
+      KeyName: "raisetech"
+      AvailabilityZone: !Sub "${AWS::Region}a"
+      Tenancy: "default"
+      NetworkInterfaces:
+      - AssociatePublicIpAddress: "true"
+        DeviceIndex: "0"            
+        SubnetId: !Ref PublicSubnet1
+        GroupSet: 
+        - !Ref SecurityGroup
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-ec2"      
+
+  RDSSecret:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "admin"}'
+        GenerateStringKey: "password"
+        PasswordLength: 16
+        ExcludeCharacters: '"@/\'
+
+  SubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Created from the RDS Management Console"
+      DBSubnetGroupName: "task10-subnetgroup"
+      SubnetIds: 
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
+      - !Ref PrivateSubnet1
+      - !Ref PrivateSubnet1
+
+  DBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: !Sub "${EnvironmentName}-rds"
+      AllocatedStorage: 20
+      DBInstanceClass: "db.t3.micro"
+      Engine: "mysql"
+      MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:username}}' ]]
+      MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:password}}' ]]
+      PreferredBackupWindow: "14:27-14:57"
+      BackupRetentionPeriod: 7
+      AvailabilityZone: !Sub "${AWS::Region}c"
+      PreferredMaintenanceWindow: "fri:16:57-fri:17:27"
+      MultiAZ: false
+      EngineVersion: "8.0.28"
+      AutoMinorVersionUpgrade: true
+      LicenseModel: "general-public-license"
+      PubliclyAccessible: false
+      StorageType: "gp2"
+      Port: 3306
+      StorageEncrypted: true
+      KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/a04424a9-7f9b-4162-b169-e0b2c10494bd"
+      CopyTagsToSnapshot: true
+      MonitoringInterval: 0
+      EnableIAMDatabaseAuthentication: false
+      EnablePerformanceInsights: false
+      DeletionProtection: false
+      VPCSecurityGroups: 
+      - !Ref SecurityGroup
+      DBSubnetGroupName: !Ref SubnetGroup 
+      DBParameterGroupName: "default.mysql8.0"
+      OptionGroupName: "default:mysql-8-0"
+      CACertificateIdentifier: "rds-ca-2019"
+
+  SecretRDSInstanceAttachment:
+    Type: "AWS::SecretsManager::SecretTargetAttachment"
+    Properties:
+      SecretId: !Ref RDSSecret
+      TargetId: !Ref DBInstance
+      TargetType: AWS::RDS::DBInstance      
+
+  LoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: !Sub "${EnvironmentName}-alb"
+      Scheme: "internet-facing"
+      Type: "application"
+      Subnets: 
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
+      SecurityGroups: 
+      - !Ref SecurityGroup
+      IpAddressType: "ipv4"         
+
+  TargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: !Sub "${EnvironmentName}-tg" 
+      HealthCheckIntervalSeconds: 30
+      Port: 80
+      Protocol: "HTTP"
+      HealthCheckProtocol: "HTTP"
+      TargetType: "instance"     
+      Matcher: 
+        HttpCode: "200"
+      HealthyThresholdCount: 5
+      VpcId: !Ref VPC
+      Targets: 
+      - Id: !Ref EC2Instance
+        Port: 80
+
+  Listener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: "HTTP"
+      DefaultActions: 
+      - TargetGroupArn: !Ref TargetGroup
+        Type: "forward"      
+
+  Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "${EnvironmentName}-storage"
+      BucketEncryption: 
+        ServerSideEncryptionConfiguration: 
+        -
+          ServerSideEncryptionByDefault: 
+            SSEAlgorithm: "AES256"
+          BucketKeyEnabled: true
+
+  BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Id: "Policy1544152951996"
+        Statement: 
+        - 
+          Sid: "Stmt1544152948221"
+          Effect: "Allow"
+          Principal: 
+            AWS: !Sub "arn:aws:iam::${AWS::AccountId}:user/Test"
+          Action: "s3:*"
+          Resource: !Sub "arn:aws:s3:::${Bucket}"        
