@@ -44,7 +44,7 @@
 
   - name: PATH for rbenv
     blockinfile:
-      dest: "{{ home_path }}/.bash_profile"
+      dest: "~/.bash_profile"
       create: yes
       insertafter: '^PATH=\$PATH:\$HOME/bin$'
       content: |
