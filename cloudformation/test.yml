@@ -286,7 +286,7 @@ Resources:
   Bucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: !Sub "${EnvironmentName}-storage"
+      BucketName: !Sub "${EnvironmentName}-teststorage"
       BucketEncryption: 
         ServerSideEncryptionConfiguration: 
         -
