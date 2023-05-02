@@ -172,11 +172,8 @@ Resources:
       KeyName: "raisetech"
       AvailabilityZone: !Sub "${AWS::Region}a"
       Tenancy: "default"
-      NetworkInterfaces:
-      - DeviceIndex: "0"            
-        SubnetId: !Ref PublicSubnet1
-        SecurityGroupIds: 
-        - !Ref SecurityGroup
+      SecurityGroupIds: 
+      - !Ref SecurityGroup
       Tags: 
       - Key: "Name"
         Value: !Sub "${EnvironmentName}-ec2"     
