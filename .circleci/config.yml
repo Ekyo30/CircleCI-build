@@ -29,6 +29,7 @@ jobs:
   ansible-execute:
     executor: ansible-playbook/default        
     steps: 
+    - checkout
     - add_ssh_keys:
         keyfingerprints:
         - "${KEY_FINGERPRINT}"
@@ -42,6 +43,7 @@ jobs:
   serverspec-execute:
     executor: ruby/default
     steps:
+    - checkout
     - ruby/install-deps: 
         app-dir: serverspec
     - run: |
