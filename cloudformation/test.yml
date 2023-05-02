@@ -214,30 +214,20 @@ Resources:
       Engine: "mysql"
       MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:username}}' ]]
       MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:password}}' ]]
-      PreferredBackupWindow: "14:27-14:57"
       BackupRetentionPeriod: 7
-      AvailabilityZone: !Sub "${AWS::Region}c"
-      PreferredMaintenanceWindow: "fri:16:57-fri:17:27"
+      AvailabilityZone: !Sub "${AWS::Region}a"
       MultiAZ: false
       EngineVersion: "8.0.28"
-      AutoMinorVersionUpgrade: true
-      LicenseModel: "general-public-license"
       PubliclyAccessible: false
       StorageType: "gp2"
       Port: 3306
       StorageEncrypted: true
       KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/a04424a9-7f9b-4162-b169-e0b2c10494bd"
       CopyTagsToSnapshot: true
-      MonitoringInterval: 0
-      EnableIAMDatabaseAuthentication: false
-      EnablePerformanceInsights: false
       DeletionProtection: false
       VPCSecurityGroups: 
       - !Ref SecurityGroup
       DBSubnetGroupName: !Ref SubnetGroup 
-      DBParameterGroupName: "default.mysql8.0"
-      OptionGroupName: "default:mysql-8-0"
-      CACertificateIdentifier: "rds-ca-2019"
 
   SecretRDSInstanceAttachment:
     Type: "AWS::SecretsManager::SecretTargetAttachment"
@@ -246,69 +236,9 @@ Resources:
       TargetId: !Ref DBInstance
       TargetType: AWS::RDS::DBInstance      
 
-  LoadBalancer:
-    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
-    Properties:
-      Name: !Sub "${EnvironmentName}-alb"
-      Scheme: "internet-facing"
-      Type: "application"
-      Subnets: 
-      - !Ref PublicSubnet1
-      - !Ref PublicSubnet2
-      SecurityGroups: 
-      - !Ref SecurityGroup
-      IpAddressType: "ipv4"         
+ 
 
-  TargetGroup:
-    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
-    Properties:
-      Name: !Sub "${EnvironmentName}-tg" 
-      HealthCheckIntervalSeconds: 30
-      Port: 80
-      Protocol: "HTTP"
-      HealthCheckProtocol: "HTTP"
-      TargetType: "instance"     
-      Matcher: 
-        HttpCode: "200"
-      HealthyThresholdCount: 5
-      VpcId: !Ref VPC
-      Targets: 
-      - Id: !Ref EC2Instance
-        Port: 80
+ 
+ 
 
-  Listener:
-    Type: "AWS::ElasticLoadBalancingV2::Listener"
-    Properties:
-      LoadBalancerArn: !Ref LoadBalancer
-      Port: 80
-      Protocol: "HTTP"
-      DefaultActions: 
-      - TargetGroupArn: !Ref TargetGroup
-        Type: "forward"      
-
-  Bucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: !Sub "${EnvironmentName}-teststorage"
-      BucketEncryption: 
-        ServerSideEncryptionConfiguration: 
-        -
-          ServerSideEncryptionByDefault: 
-            SSEAlgorithm: "AES256"
-          BucketKeyEnabled: true
-
-  BucketPolicy:
-    Type: "AWS::S3::BucketPolicy"
-    Properties:
-      Bucket: !Ref Bucket
-      PolicyDocument: 
-        Version: "2012-10-17"
-        Id: "Policy1544152951996"
-        Statement: 
-        - 
-          Sid: "Stmt1544152948221"
-          Effect: "Allow"
-          Principal: 
-            AWS: !Sub "arn:aws:iam::${AWS::AccountId}:user/Test"
-          Action: "s3:*"
-          Resource: !Sub "arn:aws:s3:::${Bucket}"        
+  
