@@ -19,6 +19,7 @@ jobs:
   cfn-execute:
     executor: aws-cli/default
     steps:
+    - checkout
     - aws-cli/setup:
         aws-access-key-id: AWS_ACCESS_KEY_ID
         aws-region: AWS_DEFAULT_REGION
