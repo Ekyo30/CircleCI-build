@@ -44,7 +44,7 @@
 
   - name: PATH for rbenv
     blockinfile:
-      dest: "~/.bash_profile"
+      dest: "~i/.bash_profile"
       create: yes
       insertafter: '^PATH=\$PATH:\$HOME/bin$'
       content: |
@@ -55,7 +55,7 @@
 
   - name: packages for ruby
     become_user: root
-    apt: pkg={{ item }}
+    yum: pkg={{ item }}
     with_items:
       - gcc
       - gcc-c++
