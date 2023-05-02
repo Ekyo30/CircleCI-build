@@ -59,12 +59,8 @@
     with_items:
       - gcc
       - gcc-c++
-      - build-essential
-      - libssl-dev
-      - libcurl4-openssl-dev
-      - libreadline-dev
-      - ruby-dev
-      - zlib1g-dev
+      - openssl-devel 
+      - zlib-devel
 
   - name: check ruby version
     command: bash -lc "rbenv versions | grep {{ ruby_version }}"
