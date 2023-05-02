@@ -173,14 +173,19 @@ Resources:
       AvailabilityZone: !Sub "${AWS::Region}a"
       Tenancy: "default"
       NetworkInterfaces:
-      - AssociatePublicIpAddress: "true"
-        DeviceIndex: "0"            
+      - DeviceIndex: "0"            
         SubnetId: !Ref PublicSubnet1
-        GroupSet: 
+        SecurityGroupIds: 
         - !Ref SecurityGroup
       Tags: 
       - Key: "Name"
-        Value: !Sub "${EnvironmentName}-ec2"      
+        Value: !Sub "${EnvironmentName}-ec2"     
+
+  IPAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref EC2Instance
+      EIP: 18.180.85.228       
 
   RDSSecret:
     Type: "AWS::SecretsManager::Secret"
