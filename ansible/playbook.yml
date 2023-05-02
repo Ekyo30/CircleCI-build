@@ -1,8 +1,88 @@
 ---
 - hosts: server
-  become: yes
+  become: true
   tasks:
   - name: install git
     yum:
       name: git 
       state: latest
+
+- name: ruby env
+  hosts: server
+  become: true
+
+  vars:
+    rbenv_path: "{{ ansible_user_dir }}/.rbenv"
+    ruby_version: 2.6.3
+    ruby_dir: "{{ rbenv_path }}/versions/{{ ruby_version }}"
+
+  tasks:
+
+  - name: check rbenv install
+    command: "{{ rbenv_path }}/bin/rbenv --version"
+    register: rbenv_exists
+    changed_when: false
+    ignore_errors: true
+
+  - name: rbenv install
+    git:
+      repo: https://github.com/sstephenson/rbenv.git
+      dest: "{{ rbenv_path }}"
+    when: rbenv_exists is failed
+
+  - name: ruby-build install
+    git:
+      repo: https://github.com/sstephenson/ruby-build.git
+      dest: "{{ rbenv_path }}/plugins/ruby-build"
+    when: rbenv_exists is failed
+
+  - name: prepare rbenv install
+    become_user: root
+    command: "{{ rbenv_path }}/plugins/ruby-build/install.sh"
+    when: rbenv_exists is failed
+
+  - name: PATH for rbenv
+    blockinfile:
+      dest: "{{ home_path }}/.bash_profile"
+      create: yes
+      insertafter: '^PATH=\$PATH:\$HOME/bin$'
+      content: |
+        export RBENV_ROOT={{ rbenv_path }}
+        export PATH="$RBENV_ROOT/bin:$PATH"
+        eval "$(rbenv init -)"
+    when: rbenv_exists is failed
+
+  - name: packages for ruby
+    become_user: root
+    apt: pkg={{ item }}
+    with_items:
+      - gcc
+      - gcc-c++
+      - build-essential
+      - libssl-dev
+      - libcurl4-openssl-dev
+      - libreadline-dev
+      - ruby-dev
+      - zlib1g-dev
+
+  - name: check ruby version
+    command: bash -lc "rbenv versions | grep {{ ruby_version }}"
+    register: rbenv_check_install
+    changed_when: false
+    ignore_errors: true
+
+  - name: install ruby
+    command: bash -lc "rbenv install {{ ruby_version }}"
+    when: rbenv_check_install is failed
+    args:
+      creates: "{{ ruby_dir }}"
+
+  - name: check rbenv global
+    command: bash -lc "rbenv version | grep {{ ruby_version }}"
+    register: rbenv_default
+    changed_when: false
+    ignore_errors: true
+
+  - name: set rbenv global
+    command: bash -lc "rbenv global {{ ruby_version }}"
+    when: rbenv_default is failed
