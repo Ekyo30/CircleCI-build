@@ -5,9 +5,12 @@
 - RaiseTechAWSフルコースでの作成物をまとめたリポジトリである。
 
 - CircleCIで以下の動作を自動処理するようにしている。
- - CloudFormationでAWSリソースを作成
- - Ansibleを使用し、作成したEC2へGitのインストール
- - ServerspecでGitがインストールされているかを確認
+　
+  - CloudFormationでAWSリソースを作成
+　　
+  - Ansibleを使用し、作成したEC2へGitのインストール
+  
+  - ServerspecでGitがインストールされているかを確認
 
 - [task_report](https://github.com/Ekyo30/RaiseTech-Task/tree/main/task_report)には課題報告用に作成したマークダウンをまとめている。
 
