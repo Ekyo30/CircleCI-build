@@ -1,0 +1,244 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "create sample environment"
+
+Parameters:
+  EnvironmentName:
+    Description: "Name of Environment"  
+    Type: String
+    Default: "test"
+
+Resources:
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: "default"
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-vpc"    
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-igw"
+  
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC        
+  
+  PublicSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone:  !Sub "${AWS::Region}a"
+      CidrBlock: "10.0.0.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-public1-${AWS::Region}a"     
+
+  PublicSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone:  !Sub "${AWS::Region}c"
+      CidrBlock: "10.0.16.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-public2-${AWS::Region}c"   
+
+  PrivateSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !GetAtt PublicSubnet1.AvailabilityZone
+      CidrBlock: "10.0.128.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-private1-${PublicSubnet1.AvailabilityZone}"   
+
+  PrivateSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !GetAtt PublicSubnet2.AvailabilityZone
+      CidrBlock: "10.0.144.0/20"
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-subnet-private2-${PublicSubnet2.AvailabilityZone}"    
+
+  PublicRouteTable1:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-public1-${PublicSubnet1.AvailabilityZone}"
+
+  PublicRouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-public2-${PublicSubnet2.AvailabilityZone}"
+
+  PublicSubnetRouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      SubnetId: !Ref PublicSubnet2
+
+  Route:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable1
+
+  PrivateRouteTable1:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-private1-${PublicSubnet1.AvailabilityZone}"
+
+  PrivateRouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-rtb-private2-${PublicSubnet2.AvailabilityZone}"
+
+  PrivateSubnet1RouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateSubnet2RouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2                   
+
+  SecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "allow all connection"
+      GroupName: !Sub "${EnvironmentName}-sg"
+      VpcId: !Ref VPC
+      SecurityGroupIngress: 
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 80
+        IpProtocol: "tcp"
+        ToPort: 80
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 3000
+        IpProtocol: "tcp"
+        ToPort: 3000
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 22
+        IpProtocol: "tcp"
+        ToPort: 22  
+      - CidrIp: "0.0.0.0/0"
+        FromPort: 3306
+        IpProtocol: "tcp"
+        ToPort: 3306        
+
+  EC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-072bfb8ae2c884cc4"
+      InstanceType: "t2.micro"
+      KeyName: "raisetech"
+      AvailabilityZone: !Sub "${AWS::Region}a"
+      Tenancy: "default"
+      SubnetId: !Ref PublicSubnet1
+      SecurityGroupIds: 
+      - !Ref SecurityGroup
+      Tags: 
+      - Key: "Name"
+        Value: !Sub "${EnvironmentName}-ec2"     
+
+  IPAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref EC2Instance
+      EIP: 18.180.85.228       
+
+  RDSSecret:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "admin"}'
+        GenerateStringKey: "password"
+        PasswordLength: 16
+        ExcludeCharacters: '"@/\'
+
+  SubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Created from the RDS Management Console"
+      DBSubnetGroupName: !Sub "${EnvironmentName}-subnetgroup"
+      SubnetIds: 
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
+      - !Ref PrivateSubnet1
+      - !Ref PrivateSubnet2
+
+  DBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: !Sub "${EnvironmentName}-rds"
+      AllocatedStorage: 20
+      DBInstanceClass: "db.t3.micro"
+      Engine: "mysql"
+      MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:username}}' ]]
+      MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref RDSSecret, ':SecretString:password}}' ]]
+      BackupRetentionPeriod: 7
+      AvailabilityZone: !Sub "${AWS::Region}a"
+      MultiAZ: false
+      EngineVersion: "8.0.28"
+      PubliclyAccessible: false
+      StorageType: "gp2"
+      Port: 3306
+      StorageEncrypted: true
+      KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/a04424a9-7f9b-4162-b169-e0b2c10494bd"
+      CopyTagsToSnapshot: true
+      DeletionProtection: false
+      VPCSecurityGroups: 
+      - !Ref SecurityGroup
+      DBSubnetGroupName: !Ref SubnetGroup 
+
+  SecretRDSInstanceAttachment:
+    Type: "AWS::SecretsManager::SecretTargetAttachment"
+    Properties:
+      SecretId: !Ref RDSSecret
+      TargetId: !Ref DBInstance
+      TargetType: AWS::RDS::DBInstance      
+
+ 
+
+ 
+ 
+
+  

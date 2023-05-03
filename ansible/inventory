@@ -1,9 +1,8 @@
 # hosts
 [server]
-18.177.144.40
+18.180.85.228
 
 [server:vars]
 ansible_ssh_port=22
 ansible_ssh_user=ec2-user
-ansible_ssh_private_key_file=~/.ssh/raisetech.pem
 __working_user=ec2-user
