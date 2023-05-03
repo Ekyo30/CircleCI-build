@@ -18,5 +18,7 @@
 ![最終AWS構成図](https://user-images.githubusercontent.com/111736198/235822953-8101f1da-4799-4602-aebc-b7ef82ca7664.png)
 
 ## フロー図
+![フロー図改訂版](https://user-images.githubusercontent.com/111736198/235887574-7570f76b-91f7-4453-b7a9-ac4ea9369116.png)
 
-![フロー図](https://user-images.githubusercontent.com/111736198/235823024-921a2d32-69ed-4b02-a518-2c197f82bf44.png)
+
+
