@@ -4,12 +4,6 @@
 
 * Mysqlのセットアップ
 
-~~~
-https://onedrive.live.com/?authkey=%21AJUub1X2ubpj9Q
-c&cid=D2DFE9880240895A&id=D2DFE9880240895A%2126879&pa
-rId=D2DFE9880240895A%211376&o=OneUp
-~~~
-
 * Bundleのinstall
 
 * Development.rbにてホストの接続を許可する
