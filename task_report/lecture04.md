@@ -8,12 +8,8 @@ $ ssh -i raisetech.pem ec2-user@ec2-43-206-158-226.
 ap-northeast-1.compute.amazonaws.com
 ~~~
 
-### Mysqlのセットアップ（下記URL参考）
-~~~
-https://onedrive.live.com/?authkey=%21AJUub1X2ubpj9Q
-c&cid=D2DFE9880240895A&id=D2DFE9880240895A%2126879&par
-Id=D2DFE9880240895A%211376&o=OneUp
-~~~
+### Mysqlのセットアップ
+
 ### Ec2からRDSへ接続
 ~~~
 $ mysql -u admin -p -h raisetech-db.cgnakqzvmqg2.
