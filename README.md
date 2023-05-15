@@ -1,8 +1,6 @@
-# RaiseTech-Task
+# CircleCIを用いた自動処理の作成
 
 ## 概要
-
-- RaiseTechAWSフルコースでの作成物をまとめたリポジトリである。
 
 - CircleCIで以下の動作を自動処理するようにしている。（EIPを使用、動作させるには割り当てが必要）
 　
@@ -12,7 +10,7 @@
   
   - ServerspecでGitがインストールされているかを確認
 
-- [task_report](https://github.com/Ekyo30/RaiseTech-Task/tree/main/task_report)には課題報告用に作成したマークダウンをまとめている。
+- [task_report](https://github.com/Ekyo30/RaiseTech-Task/tree/main/task_report)にはオンラインスクールでのアウトプットをまとめている。
 
 ## AWS構成図
 ![最終AWS構成図](https://user-images.githubusercontent.com/111736198/235822953-8101f1da-4799-4602-aebc-b7ef82ca7664.png)
