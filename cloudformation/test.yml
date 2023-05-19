@@ -183,7 +183,7 @@ Resources:
     Type: AWS::EC2::EIPAssociation
     Properties:
       InstanceId: !Ref EC2Instance
-      EIP: 18.180.85.228       
+      EIP: 13.115.158.18       
 
   RDSSecret:
     Type: "AWS::SecretsManager::Secret"
