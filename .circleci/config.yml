@@ -51,7 +51,7 @@ jobs:
         bundle exec rake spec     
 
 workflows:
-  raisetech:
+  build&test:
     jobs:
     - cfn-lint
     - cfn-execute:
