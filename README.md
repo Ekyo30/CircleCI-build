@@ -18,5 +18,9 @@
 ## フロー図
 ![フロー図改訂版](https://user-images.githubusercontent.com/111736198/235887574-7570f76b-91f7-4453-b7a9-ac4ea9369116.png)
 
+## CircleCI動作確認
+<img width="1676" alt="構築成功" src="https://github.com/Ekyo30/CircleCI-build/assets/111736198/bb20b622-2bf8-4556-af9f-c50641094156">
 
+## CFn作成リソース一覧
+<img width="1350" alt="作成リソース一覧" src="https://github.com/Ekyo30/CircleCI-build/assets/111736198/a0ffe171-81e8-4f05-a83b-54bb99c79faa">
 
